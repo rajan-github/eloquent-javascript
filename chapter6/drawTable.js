@@ -92,8 +92,40 @@ UnderlinedCell.prototype.minHeight = function() {
 }
 
 UnderlinedCell.prototype.draw = function(width, height) {
-  console.log("Calling from UnderlinedCell draw: " + width + ' -- ' + height);
+  // console.log("Calling from UnderlinedCell draw: " + width + ' -- ' + height);
   return this.inner.draw(width, height - 1).concat([repeat("-", width)]);
+}
+
+function RTextCell(text) {
+  TextCell.call(this, text);
+}
+
+RTextCell.prototype = Object.create(TextCell.prototype);
+RTextCell.prototype.draw = function(width, height) {
+  var result = [];
+  for (var i = 0; i < height; i++) {
+    var line = this.text[i] || "";
+    result.push(repeat(" ", width - line.length) + line);
+  }
+  return result;
+};
+
+function StretchCell(inner, width, height) {
+  this.inner = inner
+  this.width = width
+  this.height = height
+}
+
+StretchCell.prototype.minHeight = function() {
+  return Math.max(this.height, this.inner.minHeight());
+}
+
+StretchCell.prototype.minWidth = function() {
+  return Math.max(this.width, this.inner.minWidth());
+}
+
+StretchCell.prototype.draw = function(width, height) {
+  return this.inner.draw(width, height);
 }
 
 /**
@@ -107,7 +139,12 @@ function dataTable(data) {
   });
   var body = data.map(function(row) {
     return keys.map(function(name) {
-      return new TextCell(String(row[name]));
+      var value = row[name];
+      if (typeof value === "number")
+        return new RTextCell(String(value));
+      else
+      // return new TextCell(String(row[name]));
+        return new StretchCell(new TextCell(String(row[name])), 20, 20);
     });
   });
   return [headers].concat(body);

@@ -1,3 +1,6 @@
+/**
+this is data used to test the drawTable code.
+**/
 var MOUNTAINS = [{
   name: "Kilimanjaro",
   height: 5895,
